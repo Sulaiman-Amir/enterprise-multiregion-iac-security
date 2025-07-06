@@ -1,1 +1,34 @@
+---
+- name: Configure Bastion Host
+  hosts: bastion
+  become: true
+
+  tasks:
+    - name: Update and upgrade packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Harden SSH configuration
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin'
+        line: 'PermitRootLogin no'
+        state: present
+      notify:
+        - Restart SSH
+
+    - name: Install basic tools
+      apt:
+        name:
+          - htop
+          - curl
+          - unzip
+        state: present
+
+  handlers:
+    - name: Restart SSH
+      service:
+        name: ssh
+        state: restarted
 
